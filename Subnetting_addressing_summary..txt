@@ -1,0 +1,83 @@
+
+Canavaggio-Diana Manon
+___________________________
+
+Subnetting
+PC7 = 1 hôte
+PC6 = 1 hôte
+
+VLAN 10
+PC0 = 10 hôtes
+PC3 = 20 hôtes
+Subnet : 	Subnet mask :		Host address range :		Broadcast : 
+192.168.10.0	255.255.255.192	(/26)	192.168.10.1 - 192.168.10.62	192.168.10.63
+
+VLAN 20
+PC1 = 15 hôtes
+PC4 = 30 hôtes
+Subnet : 	Subnet mask :		Host address range :		Broadcast : 
+192.168.20.0	255.255.255.192	(/26)		192.168.20.1 - 192.168.20.62	192.168.20.63
+
+VLAN 30
+PC2 = 20 hôtes
+PC5 = 5 hôtes
+Subnet : 	Subnet mask :		Host address range :		Broadcast : 
+192.168.30.0	255.255.255.224	(/27)	192.168.30.1 - 192.168.30.30	192.168.30.31
+
+
+
+_________Config Réseau Server_________
+
+Device / Interface	IP Address / Prefix	Default Gateway
+
+RSserver G0/0/0		192.168.0.1/29		N/A
+	 S0/1/0 	10.0.0.1/29		N/A
+	 S0/1/1 	10.0.1.1/29		N/A
+
+S1	 		192.168.0.2/29		192.168.0.1
+PC7			192.168.0.3/29		192.168.0.1
+Server			192.168.0.4/29		192.168.0.1
+
+
+_________Config Réseau DHCP_________
+
+Device / Interface	IP Address / Prefix	Default Gateway
+
+RSdhcp   G0/0/0		192.168.1.1/29		N/A
+	 S0/1/0 	10.0.0.2/29		N/A
+	 S0/1/1 	10.0.1.2/29		N/A
+S2	 		192.168.1.2/29		192.168.1.1
+PC6			192.168.1.3/29		192.168.1.1
+
+
+_________Config Réseau Utilisateur/etherchannel_________
+
+Device / Interface		IP Address / Prefix	Default Gateway
+
+RSetherchannel  G0/0/0		192.168.2.1/27		N/A
+		G0/0/0.99	192.168.99.1/29		N/A
+		G0/0/0.10	192.168.10.1/27		N/A
+		G0/0/0.20	192.168.20.1/27		N/A
+		G0/0/0.30	192.168.30.1/27		N/A
+	        S0/1/0 		10.0.1.3/29		N/A
+		S0/1/1 		10.0.2.1/29		N/A
+
+S3	 	  VLAN 99	192.168.99.2/29		192.168.99.1
+S4	 	  VLAN 99	192.168.99.3/29		192.168.99.1
+S5	 	  VLAN 99	192.168.99.4/29		192.168.99.1
+
+PC0		192.168.10.2 	255.255.255.248		192.168.10.1
+PC1		192.168.20.2 	255.255.255.248		192.168.20.1
+PC2		192.168.30.2 	255.255.255.248		192.168.30.1
+PC3		192.168.10.13 	255.255.255.248		192.168.10.1
+PC4		192.168.20.18 	255.255.255.248		192.168.20.1
+PC5		192.168.30.23 	255.255.255.248		192.168.30.1
+
+
+_________Config Réseau Wireless_________
+
+Device / Interface		IP Address / Prefix	Default Gateway
+Laptop				192.168.0.6		192.168.3.1
+Wireless Router	Internet	192.168.3.1		192.168.0.1
+		LAN		192.168.0.5
+

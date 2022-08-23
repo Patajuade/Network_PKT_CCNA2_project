@@ -1,0 +1,785 @@
+
+Canavaggio-Diana Manon
+___________________________
+
+Subnetting
+Voir fichier Subnetting_addressing_summary.txt
+___________________________
+
+Addressing table
+Voir fichier Subnetting_addressing_summary.txt
+
+_________Config Réseau Server_________
+
+_________RSserver_________
+enable
+config terminal
+hostname RSserver
+no ip domain-lookup
+enable secret Class123!
+line console 0
+password Cisco123!
+login
+exit
+line vty 0 4
+password Cisco123!
+login
+service password-encryption
+banner motd $ Utilisateurs autorisés uniquement! $
+exit
+copy running-config startup-config
+
+enable
+conf t
+interface g0/0/0
+ip address 192.168.0.1 255.255.255.248
+no shutdown
+exit
+interface s0/1/0
+ip address 10.0.0.1 255.255.255.248
+no shutdown
+exit
+interface s0/1/1
+ip address 10.0.1.1 255.255.255.248
+no shutdown
+end
+wr
+
+conf t
+interface g0/0/1
+ip address 192.168.3.2 255.255.255.0
+no shutdown
+end
+wr
+
+conf t
+ip route 0.0.0.0 0.0.0.0 10.0.0.2
+ip route 0.0.0.0 0.0.0.0 10.0.2.1
+end 
+wr
+show ip route | begin Gateway
+
+conf t
+router ospf 10
+network 192.168.0.0 255.255.255.248 area 0
+network 10.0.0.0 255.255.255.248 area 0
+network 10.0.2.0 255.255.255.248 area 0
+end
+wr
+
+_________S1_________
+enable
+config terminal
+hostname S1
+no ip domain-lookup
+enable secret Class123!
+line console 0
+password Cisco123!
+login
+exit
+line vty 0 15
+password Cisco123!
+login
+service password-encryption
+banner motd $ Utilisateurs autorisés seulement ! $
+exit
+copy running-config startup-config
+
+conf t
+vlan 99
+name Management
+end
+wr
+
+conf t
+interface vlan 1
+ip address 192.168.0.2 255.255.255.248
+no shutdown
+ip default-gateway 192.168.0.1
+exit
+wr
+
+conf t
+interface f0/1
+switchport mode access
+switchport access vlan 1
+exit
+interface f0/4
+switchport mode access
+switchport access vlan 1
+exit
+interface range f0/5-24
+shutdown
+exit
+interface range g0/1-2
+shutdown
+end
+wr
+
+conf t
+vlan 999
+name BlackHole
+exit
+interface range f0/5-24, g0/1-2
+switchport access vlan 999
+end
+wr
+
+conf t
+interface range f0/1-4
+switchport port-security
+switchport port-security maximum 1
+switchport port-security mac-address sticky
+switchport port-security violation restrict
+end
+wr
+show port-security
+show port-security address
+
+show ip ssh
+configure terminal
+ip domain-name "serverNetwork.com"
+crypto key generate rsa
+ip ssh version 2
+username ServerNetworkAdmin secret S3rv3rN3tw0rk!
+line vty 0 15
+transport input ssh
+login local
+end
+wr
+
+_________Config Réseau DHCP_________
+
+_________RSdhcp_________
+enable
+config terminal
+hostname RSdhcp
+no ip domain-lookup
+enable secret Class123!
+line console 0
+password Cisco123!
+login
+exit
+line vty 0 4
+password Cisco123!
+login
+service password-encryption
+banner motd $ Utilisateurs autorisés uniquement! $
+exit
+copy running-config startup-config
+
+enable
+conf t
+interface g0/0/0
+ip address 192.168.1.1 255.255.255.248
+no shutdown
+exit
+interface s0/1/0
+ip address 10.0.0.2 255.255.255.248
+no shutdown
+exit
+interface s0/1/1
+ip address 10.0.1.2 255.255.255.248
+no shutdown
+end
+wr
+
+conf t 
+ip route 0.0.0.0 0.0.0.0 10.0.0.1
+ip route 0.0.0.0 0.0.0.0 10.0.1.3
+end
+wr
+show ip route | begin Gateway
+
+conf t
+router ospf 10
+network 192.168.1.0 255.255.255.248 area 0
+network 10.0.0.0 255.255.255.248 area 0
+network 10.0.1.0 255.255.255.248 area 0
+end
+wr
+
+conf t
+ip dhcp excluded-address 192.168.1.1 192.168.1.2
+ip dhcp pool LAN1
+network 192.168.1.0 255.255.255.248
+default-router 192.168.1.1
+domain-name projet.com
+exit
+end
+wr
+show ip dhcp pool
+show ip dhcp binding
+
+_________S2_________
+enable
+config terminal
+hostname S2
+no ip domain-lookup
+enable secret Class123!
+line console 0
+password Cisco123!
+login
+exit
+line vty 0 15
+password Cisco123!
+login
+service password-encryption
+banner motd $ Utilisateurs autorisés seulement ! $
+exit
+copy running-config startup-config
+
+conf t
+vlan 99
+name Management
+end
+wr
+
+conf t
+interface vlan 99
+ip address 192.168.1.2 255.255.255.248
+no shutdown
+exit
+ip default-gateway 192.168.1.1
+exit
+wr
+
+conf t
+interface f0/1
+switchport mode access
+switchport access vlan 1
+exit
+interface range f0/3-24
+shutdown
+exit
+interface range g0/1-2
+shutdown
+end
+wr
+
+conf t
+vlan 999
+name BlackHole
+exit
+interface range f0/3-24, g0/1-2
+switchport access vlan 999
+end
+wr
+
+conf t
+interface range f0/1-2
+switchport port-security
+switchport port-security maximum 1
+switchport port-security mac-address sticky
+switchport port-security violation restrict
+end
+wr
+show port-security
+show port-security address
+
+show ip ssh
+configure terminal
+ip domain-name "dhcpNetwork.com"
+crypto key generate rsa
+2048
+ip ssh version 2
+username DhcpNetworkAdmin secret DHCPN3tw0rk!
+line vty 0 15
+transport input ssh
+login local
+end
+wr
+
+
+
+_________Config Réseau Utilisateur/etherchannel_________
+
+_________RSetherchannel_________
+enable
+config terminal
+hostname RSetherchannel
+no ip domain-lookup
+enable secret Class123!
+line console 0
+password Cisco123!
+login
+exit
+line vty 0 4
+password Cisco123!
+login
+service password-encryption
+banner motd $ Utilisateurs autorisés uniquement! $
+exit
+copy running-config startup-config
+
+enable
+conf t
+interface g0/0/0
+ip address 192.168.2.1 255.255.255.224
+no shutdown
+exit
+conf t
+interface s0/1/0
+ip address 10.0.1.3 255.255.255.248
+no shutdown
+exit
+interface s0/1/1
+ip address 10.0.2.1 255.255.255.248
+no shutdown
+end
+wr
+
+conf t
+ip route 0.0.0.0 0.0.0.0 10.0.1.2
+ip route 0.0.0.0 0.0.0.0 10.0.1.1
+end
+wr
+
+conf t
+interface g0/0/0.99
+encapsulation dot1Q 99
+ip address 192.168.99.1 255.255.255.248
+end
+wr
+conf t
+interface g0/0/0.10
+encapsulation dot1Q 10
+ip address 192.168.10.1 255.255.255.192
+end
+wr
+conf t
+interface g0/0/0.20
+encapsulation dot1Q 20
+ip address 192.168.20.1 255.255.255.192
+end
+wr
+conf t
+interface g0/0/0.30
+encapsulation dot1Q 30
+ip address 192.168.30.1 255.255.255.224
+end
+wr
+
+show ip interface brief
+
+conf t
+router ospf 10
+network 192.168.1.0 255.255.255.224 area 0
+network 10.0.1.0 255.255.255.224 area 0
+end
+wr
+
+_________S3_________
+enable
+config terminal
+hostname S3
+no ip domain-lookup
+enable secret Class123!
+line console 0
+password Cisco123!
+login
+exit
+line vty 0 15
+password Cisco123!
+login
+service password-encryption
+banner motd $ Utilisateurs autorisés seulement ! $
+exit
+
+
+conf t
+interface f0/1
+switchport mode access
+switchport access vlan 1
+end
+conf t
+interface f0/2
+switchport mode access
+switchport access vlan 1
+end
+conf t
+interf g0/1
+switchport mode trunk
+switchport trunk allow vlan 1,10,20,30,99,1000
+switchport trunk native vlan 1000
+
+show ip ssh
+configure terminal
+ip domain-name "s3Network.com"
+crypto key generate rsa
+ip ssh version 2
+username s3Network secret S3n3tw0rk!
+line vty 0 15
+transport input ssh
+login local
+end
+wr
+
+enable
+conf t
+vlan 10
+name VLAN10
+vlan 20
+name VLAN20
+vlan 30
+name VLAN30
+vlan 99
+name Management
+vlan 1000
+name Native
+end
+wr
+
+conf t
+interface vlan 99
+ip add 192.168.99.2 255.255.255.248
+no shutdown
+ip default-gateway 192.168.99.1
+end
+wr
+
+enable
+conf t
+interface range f0/3-6
+channel-group 1 mode active
+exit
+interface range f0/7-9
+channel-group 2 mode active
+end
+wr
+
+conf t
+interface port-channel 1
+switchport mode trunk
+switchport trunk native vlan 1000
+switchport trunk allowed vlan 1,10,20,30,1000
+exit
+interface port-channel 2
+switchport mode trunk
+switchport trunk native vlan 1000
+switchport trunk allowed vlan 1,10,20,30,1000
+end
+wr
+
+conf t
+vlan 999
+name BlackHole
+exit
+interface range f0/10-24 
+switchport access vlan 999
+end
+conf t
+interface range f0/1-2 
+switchport access vlan 999
+end
+wr
+
+conf t
+interface range f0/1-9
+switchport port-security
+switchport port-security maximum 4
+switchport port-security mac-address sticky
+switchport port-security violation restrict
+end
+wr
+show port-security
+show port-security address
+
+conf t
+spanning-tree vlan 10 priority 0
+spanning-tree vlan 20 priority 0
+spanning-tree vlan 30 priority 0
+spanning-tree vlan 99 priority 0
+spanning-tree vlan 1000 priority 0
+
+spanning-tree vlan 10 root primary
+spanning-tree vlan 20 root primary
+spanning-tree vlan 30 root primary
+spanning-tree vlan 99 root primary
+spanning-tree vlan 1000 root primary
+end
+wr
+
+_________S4_________
+enable
+config terminal
+hostname S4
+no ip domain-lookup
+enable secret Class123!
+line console 0
+password Cisco123!
+login
+exit
+line vty 0 15
+password Cisco123!
+login
+service password-encryption
+banner motd $ Utilisateurs autorisés seulement ! $
+exit
+copy running-config startup-config
+
+show ip ssh
+configure terminal
+ip domain-name "user1network.com"
+crypto key generate rsa
+ip ssh version 2
+username user1network secret Us3r1n3tw0rk!
+line vty 0 15
+transport input ssh
+login local
+end
+wr
+
+enable
+conf t
+vlan 10
+name VLAN10
+vlan 20
+name VLAN20
+vlan 30
+name VLAN30
+vlan 99
+name Management
+vlan 1000
+name Native
+end
+wr
+show vlan brief
+
+conf t
+interface vlan 99
+ip add 192.168.99.3 255.255.255.248
+no shutdown
+ip default-gateway 192.168.99.1
+end
+wr
+
+conf t
+interface f0/5
+switchport mode access
+switchport access vlan 10
+exit
+interface f0/6
+switchport mode access
+switchport access vlan 20
+exit
+interface f0/7
+switchport mode access
+switchport access vlan 30
+end
+show vlan brief
+wr
+
+enable
+conf t
+interface range f0/1-4
+switchport mode trunk
+switchport trunk native vlan 1000
+switchport trunk allowed vlan 10,20,30,1000
+end
+wr
+show interfaces trunk
+
+enable 
+conf t
+interface range f0/1-4
+channel-group 1 mode active
+end
+wr
+
+
+conf t
+vlan 999
+name BlackHole
+exit
+interface range f0/8-24, g0/2
+switchport access vlan 999
+shutdown
+end
+wr
+
+conf t
+interface G0/1
+switchport mode trunk
+switchport nonegotiate
+vlan 1000
+name Native
+exit
+interface g0/1
+switchport trunk native vlan 1000
+end
+wr
+
+conf t
+interface range f0/1-7
+switchport port-security
+switchport port-security maximum 4
+switchport port-security mac-address sticky
+switchport port-security violation restrict
+end
+wr
+show port-security
+show port-security address
+
+conf t
+interface G0/1
+ip dhcp snooping trust
+exit
+interface range f0/1-7
+ip dhcp snooping limit rate 5
+spanning-tree portfast
+spanning-tree bpduguard enable
+end
+wr
+
+conf t
+spanning-tree vlan 10 priority 4096
+spanning-tree vlan 20 priority 4096
+spanning-tree vlan 30 priority 4096
+spanning-tree vlan 99 priority 4096
+spanning-tree vlan 1000 priority 4096
+end
+wr
+
+_________S5_________
+enable
+config terminal
+hostname S5
+no ip domain-lookup
+enable secret Class123!
+line console 0
+password Cisco123!
+login
+exit
+line vty 0 15
+password Cisco123!
+login
+service password-encryption
+banner motd $ Utilisateurs autorisés seulement ! $
+exit
+copy running-config startup-config
+
+show ip ssh
+configure terminal
+ip domain-name "user2network.com"
+crypto key generate rsa
+ip ssh version 2
+username user2network secret Us3r2n3tw0rk!
+line vty 0 15
+transport input ssh
+login local
+end
+wr
+
+enable
+conf t
+vlan 10
+name VLAN10
+vlan 20
+name VLAN20
+vlan 30
+name VLAN30
+vlan 99
+name Management
+vlan 1000
+name Native
+end
+wr
+show vlan brief
+
+conf t
+interface vlan 99
+no shutdown
+ip add 192.168.99.4 255.255.255.248
+ip default-gateway 192.168.99.1
+end
+wr
+
+conf t
+interface f0/4
+switchport mode access
+switchport access vlan 10
+exit
+interface f0/5
+switchport mode access
+switchport access vlan 20
+exit
+interface f0/6
+switchport mode access
+switchport access vlan 30
+end
+show vlan brief
+wr
+
+enable
+conf t
+interface range f0/1-3
+switchport mode trunk
+switchport trunk native vlan 1000
+switchport trunk allowed vlan 10,20,30,1000
+end
+wr
+show interfaces trunk
+
+enable 
+conf t
+interface range f0/1-3
+channel-group 2 mode active
+end
+wr
+
+enable
+conf t
+interface range f0/8-24
+shutdown
+exit
+interface range g0/1
+shutdown
+end
+wr
+
+conf t
+vlan 999
+name BlackHole
+exit
+interface range f0/7-24, g0/2
+switchport access vlan 999
+shutdown
+end
+wr
+
+conf t
+interface G0/1
+switchport mode trunk
+switchport nonegotiate
+vlan 1000
+name Native
+exit
+interface g0/1
+switchport trunk native vlan 1000
+
+conf t
+interface range f0/1-6
+switchport port-security
+switchport port-security maximum 4
+switchport port-security mac-address sticky
+switchport port-security violation restrict
+end
+wr
+show port-security
+show port-security address
+
+conf t
+ip dhcp snooping
+ip dhcp snooping vlan 10,20,30,99
+spanning-tree portfast default
+
+conf t
+spanning-tree vlan 10 priority 4096
+spanning-tree vlan 20 priority 4096
+spanning-tree vlan 30 priority 4096
+spanning-tree vlan 99 priority 4096
+spanning-tree vlan 1000 priority 4096
+end
+wr
+
